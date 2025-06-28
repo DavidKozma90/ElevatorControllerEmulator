@@ -1,18 +1,13 @@
+#include "commonHeader.h"
 #include "PublicAPI/condsel.h"
 #include "Utils/customAssert.h"
 
-typedef enum 
-{
-    CONDSEL_CALL_PENDING_ANY   = 0,  /* There is an active call below or same or above the elevator current level */
-    CONDSEL_CALL_PENDING_BELOW = 1,  /* There is an active call below the elevator current level */
-    CONDSEL_CALL_PENDING_SAME  = 2,  /* There is an active call on the same level of the elevator */
-    CONDSEL_CALL_PENDING_ABOVE = 3,  /* There is an active call above the elevator current level */
-    CONDSEL_DOOR_CLOSED        = 4,  /* Door is closed and locked */
-    CONDSEL_DOOR_OPEN          = 5,  /* Door is fully opened */
-    CONDSEL_RESERVED           = 6,  /* Reserved / Not in use */
-    CONDSEL_FIXED_ZERO         = 7   /* Fixed value of zero (false) */
-}CondSelIndex_e;
-
+/** Calculates the result of the condition selector based on the parameters.
+ * @param[in] invert  Return value is inverted.
+ * @param[in] index   Index of the value to select (@see documentation for details).
+ * @param[in] values  External input values to select.
+ * @return Resturns with the selected value or the negated value of it.
+ */  
 bool CondSel_calc(const bool invert, const uint8_t index, const CondSel_In values)
 {
     bool condition = false;
@@ -41,6 +36,7 @@ bool CondSel_calc(const bool invert, const uint8_t index, const CondSel_In value
             ASSERT_FATAL_ERROR("ERROR: Reserved condition selector index used");
             break;
         case CONDSEL_FIXED_ZERO:
+            /* Always returns false before inversion (allows unconditional jump via invert=true) */
             condition = false;
             break;
         default:

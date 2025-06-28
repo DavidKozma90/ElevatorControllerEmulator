@@ -1,10 +1,11 @@
-#include "PublicAPI/seqnet.h"
 #include <stdio.h>
+#include "commonHeader.h"
+#include "PublicAPI/seqnet.h"
 
 #define PROG_MEM_SIZE 256U
 
 uint16_t ProgMem[PROG_MEM_SIZE];
-uint8_t  PC;
+static uint8_t PC;
 
 const uint16_t JUMP_ADDR_MASK      = 0x00FFU;
 const uint16_t REQ_MOVE_UP_MASK    = 0x0100U;
@@ -16,18 +17,23 @@ const uint16_t COND_INVERT_MASK    = 0x8000U;
 
 const uint16_t COND_SELECT_SHIFT = 12U;
 
+/** @brief Initializes the sequential network internal state.
+  * Note: needs to be called only once at startup
+  */
 void SeqNet_init(void)
 {
-    /* Set all instructions to zero */
     for (uint16_t i = 0; i < PROG_MEM_SIZE; i++)
     {
         ProgMem[i] = 0x00;
     }
     
-    /* Program counter reset */
     PC = 0x00;
 }
 
+/** Steps the sequential network to the next state.
+  * @param[in] condition_active  True, if the selected condition value is active (or inactive if inversion is activate)
+  * @return Returns with the new instruction values (@see SeqNet_Out).
+  */
 SeqNet_Out SeqNet_loop(const bool condition_active)
 {
     SeqNet_Out output = {0};
