@@ -29,11 +29,11 @@ workspace (workspaceName)
 
     defaultplatform ("x64")
 
-    filter "configurations:Debug or Debug_RGFW"
+    filter "configurations:Debug"
         defines { "DEBUG" }
         symbols "On"
 
-    filter "configurations:Release or Release_RGFW"
+    filter "configurations:Release"
         defines { "NDEBUG" }
         optimize "On"
 

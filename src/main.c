@@ -1,11 +1,11 @@
 #include <stdio.h>
+#include "PublicAPI/seqnet.h"
+#include "PublicAPI/condsel.h"
 
 int main ()
 {
-	for(int i = 0; i < 20; i++)
-	{
-		printf("Hello, World!\n");
-	}
-	
+	printf("Elevator Controller Emulator\n");
+	printf("This is a test build.\n");
+	SeqNet_init();
 	return 0;
 }
