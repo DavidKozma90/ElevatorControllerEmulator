@@ -5,6 +5,9 @@
 
 #define PROG_MEM_SIZE 256U
 
+#define DOOR_CLOSED false
+#define DOOR_OPEN true 
+
 typedef enum 
 {
     CONDSEL_CALL_PENDING_ANY   = 0,  /* There is an active call below or same or above the elevator current level */

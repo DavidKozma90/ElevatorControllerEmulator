@@ -13,7 +13,7 @@ int main ()
 	input.jump_addr = 0x05;
 	input.req_move_up = false;
 	input.req_move_down = true;
-	input.req_door_state = false;
+	input.req_door_state = DOOR_CLOSED;
 	input.req_reset = false;
 	input.cond_sel = CONDSEL_CALL_PENDING_SAME;
 	input.cond_inv = false;
