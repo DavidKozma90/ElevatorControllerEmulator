@@ -1,11 +1,12 @@
 #include <stdio.h>
 #include "PublicAPI/seqnet.h"
 #include "PublicAPI/condsel.h"
+#include <CustomAssert/customAssert.h>
 
 int main ()
 {
-	printf("Elevator Controller Emulator\n");
-	printf("This is a test build.\n");
-	SeqNet_init();
-	return 0;
+
+	CUSTOM_ASSERT_FALSE("This is a custom assert message");
+	printf("Hello, World!\n");
+	
 }
