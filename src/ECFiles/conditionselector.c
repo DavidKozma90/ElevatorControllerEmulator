@@ -38,13 +38,13 @@ bool CondSel_calc(const bool invert, const uint8_t index, const CondSel_In value
             condition = values.door_open;
             break;
         case CONDSEL_RESERVED:
-            CUSTOM_ASSERT_FALSE("ERROR: Reserved condition selector index used");
+            ASSERT_FATAL_ERROR("ERROR: Reserved condition selector index used");
             break;
         case CONDSEL_FIXED_ZERO:
             condition = false;
             break;
         default:
-            CUSTOM_ASSERT_FALSE("ERROR: Invalid condition selector index");
+            ASSERT_FATAL_ERROR("ERROR: Invalid condition selector index");
             break;
     }
 

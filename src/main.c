@@ -5,8 +5,7 @@
 
 int main ()
 {
-
-	CUSTOM_ASSERT_FALSE("This is a custom assert message");
-	printf("Hello, World!\n");
+	ASSERT_FATAL_ERROR("TEST: This is a custom assert test that should always fail.");
+	
 	
 }
