@@ -74,38 +74,91 @@ Simply rename `src/main.c` to `src/main.cpp` and re-run the steps above and do a
 # Using your own code
 Simply remove `src/main.c` and replace it with your code, and re-run the steps above and do a clean build.
 
-# Building for other OpenGL targets
-If you need to build for a different OpenGL version than the default (OpenGL 3.3) you can specify an OpenGL version in your premake command line. Just modify the bat file or add the following to your command line
+# Safety Considerations
 
-## For OpenGL 1.1
-`--graphics=opengl11`
+This section outlines key safety concerns related to the elevator controller design and identifies how each is handled or mitigated in the current firmware. Where appropriate, recommended improvements or external system responsibilities are also noted.
 
-## For OpenGL 2.1
-`--graphics=opengl21`
+---
 
-## For OpenGL 4.3
-`--graphics=opengl43`
+## 1. Shaft Endpoint Protection
 
-## For OpenGLES 2.0
-`--graphics=opengles2`
+- **Concern:** Moving down from floor 0 or up beyond the top floor.
+- **Current Handling:** ❌ Not enforceable in firmware due to API limitations.
+- **Mitigation:** Must be handled via hardware (limit switches).
+- **Recommendation:** Extend `CondSel_In` to include `at_floor0`, `at_top_floor` for safe movement gating.
 
-## For OpenGLES 3.0
-`--graphics=opengles3`
+---
 
-# License
-Copyright (c) 2020-2025 Jeffery Myers
+## 2. Door Interlock Enforcement
 
-This software is provided "as-is", without any express or implied warranty. In no event 
-will the authors be held liable for any damages arising from the use of this software.
+- **Concern:** Moving while door is open or unlocked.
+- **Current Handling:** ✅ Movement commands only issued if `door_closed == true`.
+- **Mitigation:** Built into instruction sequence logic.
+- **Recommendation:** Ensure mechanical door lock relay also wired in real system.
 
-Permission is granted to anyone to use this software for any purpose, including commercial 
-applications, and to alter it and redistribute it freely, subject to the following restrictions:
+---
 
-  1. The origin of this software must not be misrepresented; you must not claim that you 
-  wrote the original software. If you use this software in a product, an acknowledgment 
-  in the product documentation would be appreciated but is not required.
+## 3. Door Obstruction / Reopen
 
-  2. Altered source versions must be plainly marked as such, and must not be misrepresented
-  as being the original software.
+- **Concern:** Door closes while someone is in the doorway or a new request arrives.
+- **Current Handling:** ⚠️ Reopen support added via check for `call_pending_same` during door-close step.
+- **Limitation:** No physical obstruction sensor present in the API.
+- **Recommendation:** Add optional obstruction detection input or use door-close timeout.
 
-  3. This notice may not be removed or altered from any source distribution.
+---
+
+## 4. Emergency Stop / Fault Recovery
+
+- **Concern:** Hardware failure, watchdog timeout, or system fault.
+- **Current Handling:** ❌ Not handled in current logic.
+- **Recommendation:** Extend API with fault output, implement watchdog or safe-mode behavior.
+
+---
+
+## 5. Output Clamping and Exclusivity
+
+- **Concern:** `move_up` and `move_down` outputs simultaneously active.
+- **Current Handling:** ✅ Firmware ensures only one motion bit is ever set per instruction.
+- **Recommendation:** Add hardware relay interlock for redundancy.
+
+---
+
+## 6. Power Loss and Reboot Safety
+
+- **Concern:** Elevator resumes motion on reboot or stops mid-shaft.
+- **Current Handling:** ✅ On startup, system resets to idle and waits for a call.
+- **Recommendation:** Ensure motor is off at startup and position detection is reliable.
+
+---
+
+## 7. Multiple Simultaneous Calls
+
+- **Concern:** Multiple requests issued; controller must choose direction.
+- **Current Handling:** ✅ Firmware prioritizes: below → above → same floor.
+- **Limitation:** No direction memory; controller may reverse mid-path.
+- **Recommendation:** Add direction memory for smarter scheduling if needed.
+
+---
+
+## 8. API Safety Limitations
+
+- **Concern:** Controller cannot reason about physical limits or position.
+- **Current Handling:** ⚠️ Missing inputs (e.g. current floor, top/bottom indicators).
+- **Recommendation:** Extend API with discrete position data or one-hot floor inputs.
+
+---
+
+## Summary Table
+
+| Safety Concern         | Handled? | Notes / Recommendations                            |
+|------------------------|----------|----------------------------------------------------|
+| Shaft end movement     | ❌        | Needs position input or hardware interlock         |
+| Door interlock         | ✅        | Software logic enforced                            |
+| Door re-open           | ⚠️        | Covered via call repeat; no obstruction detection  |
+| Emergency stop         | ❌        | Watchdog or manual stop not implemented            |
+| Output exclusivity     | ✅        | Handled in firmware; redundant relay suggested     |
+| Power-on reset         | ✅        | Defaults to safe idle state                        |
+| Direction prioritization| ✅       | Simple logic, no movement memory                   |
+| API safety gaps        | ⚠️        | Extension required for full safety coverage        |
+
+
