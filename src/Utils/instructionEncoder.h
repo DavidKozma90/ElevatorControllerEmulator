@@ -19,13 +19,29 @@ static inline uint16_t EncodeInstruction(const SeqNet_Out* instruction)
 {
     uint16_t encoded = 0;
 
-    encoded |= ((uint16_t)(instruction->jump_addr)      & JUMP_ADDR_MASK);
-    encoded |= ((uint16_t)(instruction->req_move_up)    << 8);
-    encoded |= ((uint16_t)(instruction->req_move_down)  << 9);
-    encoded |= ((uint16_t)(instruction->req_door_state) << 10);
-    encoded |= ((uint16_t)(instruction->req_reset)      << 11);
-    encoded |= ((uint16_t)(instruction->cond_sel)       << 12);
-    encoded |= ((uint16_t)(instruction->cond_inv)       << 15);
+    encoded |= ((uint16_t)(instruction->jump_addr)       & JUMP_ADDR_MASK);
+    encoded |= ((uint16_t)(instruction->req_move_up & 0x01)    << REQ_MOVE_UP_SHIFT);
+    encoded |= ((uint16_t)(instruction->req_move_down & 0x01)  << REQ_MOVE_DOWN_SHIFT);
+    encoded |= ((uint16_t)(instruction->req_door_state & 0x01) << REQ_DOOR_STATE_SHIFT);
+    encoded |= ((uint16_t)(instruction->req_reset & 0x01)      << REQ_CALL_RESET_SHIFT);
+    encoded |= ((uint16_t)(instruction->cond_sel & 0x07)       << COND_SELECT_SHIFT);
+    encoded |= ((uint16_t)(instruction->cond_inv & 0x01)       << COND_INVERT_SHIFT);
 
     return encoded;
+}
+
+/* Helper method to decode a 16-bit encoded instruction into a SeqNet_Out structure. */
+static inline SeqNet_Out DecodeInstruction(const uint16_t encoded)
+{
+    SeqNet_Out instruction = {0};
+
+    instruction.jump_addr      = (uint8_t)(encoded & JUMP_ADDR_MASK);                          /* Bits 0-7 */
+    instruction.req_move_up    = ((encoded & REQ_MOVE_UP_MASK) != 0U) ? true : false;          /* Bit 8 */
+    instruction.req_move_down  = ((encoded & REQ_MOVE_DOWN_MASK) != 0U) ? true : false;        /* Bit 9 */
+    instruction.req_door_state = ((encoded & REQ_DOOR_STATE_MASK) != 0U) ? true : false;       /* Bit 10 */
+    instruction.req_reset      = ((encoded & REQ_CALL_RESET_MASK) != 0U) ? true : false;       /* Bit 11 */
+    instruction.cond_sel       = (uint8_t)((encoded & COND_SELECT_MASK) >> COND_SELECT_SHIFT); /* Bits 12-14 */
+    instruction.cond_inv       = ((encoded & COND_INVERT_MASK) != 0U) ? true : false;          /* Bit 15 */
+
+    return instruction;
 }

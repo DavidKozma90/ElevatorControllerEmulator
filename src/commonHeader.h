@@ -30,4 +30,13 @@ extern const uint16_t REQ_CALL_RESET_MASK;
 extern const uint16_t COND_SELECT_MASK;
 extern const uint16_t COND_INVERT_MASK;
 
-extern const uint16_t COND_SELECT_SHIFT;
+static const uint16_t REQ_MOVE_UP_SHIFT    = 8U;
+static const uint16_t REQ_MOVE_DOWN_SHIFT  = 9U;
+static const uint16_t REQ_DOOR_STATE_SHIFT = 10U;
+static const uint16_t REQ_CALL_RESET_SHIFT = 11U;
+static const uint16_t COND_SELECT_SHIFT    = 12U;
+static const uint16_t COND_INVERT_SHIFT    = 15U;
+
+extern uint8_t getProgramCounter(void);
+extern void LoadProgram_Default(void);
+extern void checkIfProgramCounterIsOutOfBounds(void);
