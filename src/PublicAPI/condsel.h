@@ -30,11 +30,11 @@ extern "C" {
 
 /** Input values of the condition selector. */
 typedef struct {
-	bool call_pending_below;  /* There is an active call below the elevator current level */
-	bool call_pending_same;   /* There is an active call on the same level of the elevator */
-	bool call_pending_above;  /* There is an active call above the elevator current level */
-	bool door_closed;         /* Door is closed and locked */
-	bool door_open;           /* Door is fully opened */
+    bool call_pending_below;  /* There is an active call below the elevator current level */
+    bool call_pending_same;   /* There is an active call on the same level of the elevator */
+    bool call_pending_above;  /* There is an active call above the elevator current level */
+    bool door_closed;         /* Door is closed and locked */
+    bool door_open;           /* Door is fully opened */
 } CondSel_In;
 
 /** Calculates the result of the condition selector based on the parameters.

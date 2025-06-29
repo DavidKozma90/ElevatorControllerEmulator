@@ -8,6 +8,14 @@
 #define DOOR_CLOSED false
 #define DOOR_OPEN true 
 
+#define ENABLE_LOGGING 1 /* Set to 0 to disable detailed logging */
+
+#if(ENABLE_LOGGING == 1)
+    #define LOG(fmt, ...) \
+        printf("[LOG] " fmt, ##__VA_ARGS__)
+#else
+    #define LOG(fmt, ...)
+#endif
 typedef enum 
 {
     CONDSEL_CALL_PENDING_ANY   = 0,  /* There is an active call below or same or above the elevator current level */
@@ -19,8 +27,6 @@ typedef enum
     CONDSEL_RESERVED           = 6,  /* Reserved / Not in use */
     CONDSEL_FIXED_ZERO         = 7   /* Fixed value of zero (false) */
 }CondSelIndex_e;
-
-extern uint16_t ProgMem[];
 
 extern const uint16_t JUMP_ADDR_MASK;
 extern const uint16_t REQ_MOVE_UP_MASK;
@@ -37,6 +43,9 @@ static const uint16_t REQ_CALL_RESET_SHIFT = 11U;
 static const uint16_t COND_SELECT_SHIFT    = 12U;
 static const uint16_t COND_INVERT_SHIFT    = 15U;
 
-extern uint8_t getProgramCounter(void);
+extern uint8_t GetProgramCounter(void);
 extern void LoadProgram_Default(void);
-extern void checkIfProgramCounterIsOutOfBounds(void);
+extern uint8_t GetProgramSize(void);
+extern void RunValidationTests(void);
+extern uint16_t GetProgMemAtPC(uint8_t program_counter);
+extern void printProgMem(void);

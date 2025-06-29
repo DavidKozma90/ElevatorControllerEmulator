@@ -31,13 +31,13 @@ extern "C" {
 #include <stdbool.h>
 
 typedef struct {
-	bool cond_inv;        /* Condition value inversion */
-	uint8_t cond_sel;     /* Condition value selection */
-	bool req_reset;       /* Reset call state for the actual level */
-	bool req_door_state;  /* Request to open the door (request to close if false) */
-	bool req_move_down;   /* Request to move the elevator to a lower level */
-	bool req_move_up;     /* Request to move the elevator to a higher level */
-	uint8_t jump_addr;    /* Address to jump if condition result is active */
+    bool cond_inv;        /* Condition value inversion */
+    uint8_t cond_sel;     /* Condition value selection */
+    bool req_reset;       /* Reset call state for the actual level */
+    bool req_door_state;  /* Request to open the door (request to close if false) */
+    bool req_move_down;   /* Request to move the elevator to a lower level */
+    bool req_move_up;     /* Request to move the elevator to a higher level */
+    uint8_t jump_addr;    /* Address to jump if condition result is active */
 } SeqNet_Out;
 
 /** Initializes the sequential network internal state.

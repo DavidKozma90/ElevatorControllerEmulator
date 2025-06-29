@@ -1,11 +1,66 @@
+#include <stdio.h>
 #include "commonHeader.h"
 #include "PublicAPI/seqnet.h"
 #include "Utils/instructionEncoder.h"
-#include "Utils/customAssert.h"
-#include <stdio.h>
-#include <string.h>
+
+#define PROG_MEM_SIZE 256U
+
+/** @brief Sequential network program memory.
+  * Note: needs to be initialized before use.
+  */
+static uint16_t ProgMem[PROG_MEM_SIZE];
+
+/** @brief Program counter for the sequential network.
+  * Note: needs to be initialized before use.
+  */
+static volatile uint8_t PC;
 
 static uint8_t ProgramSize = 0U;
+
+const uint16_t JUMP_ADDR_MASK      = 0x00FFU;
+const uint16_t REQ_MOVE_UP_MASK    = 0x0100U;
+const uint16_t REQ_MOVE_DOWN_MASK  = 0x0200U;
+const uint16_t REQ_DOOR_STATE_MASK = 0x0400U;
+const uint16_t REQ_CALL_RESET_MASK = 0x0800U;
+const uint16_t COND_SELECT_MASK    = 0x7000U;
+const uint16_t COND_INVERT_MASK    = 0x8000U;
+
+/** @brief Initializes the sequential network internal state.
+  * Note: needs to be called only once at startup
+  */
+void SeqNet_init(void)
+{
+    for (uint16_t i = 0; i < PROG_MEM_SIZE; i++)
+    {
+        ProgMem[i] = 0x00;
+    }
+    
+    PC = 0x00;
+    ProgramSize = 0U;
+}
+
+/** Steps the sequential network to the next state.
+  * @param[in] condition_active  True, if the selected condition value is active (or inactive if inversion is activate)
+  * @return Returns with the new instruction values (@see SeqNet_Out).
+  */
+SeqNet_Out SeqNet_loop(const bool condition_active)
+{
+    SeqNet_Out output = {0};
+    uint16_t instruction = ProgMem[PC];
+
+    output = DecodeInstruction(instruction);
+
+    if(condition_active)
+    {
+        PC = output.jump_addr;
+    }
+    else
+    {
+        PC = (uint8_t)(((uint16_t)PC + 1U) % PROG_MEM_SIZE);
+    }
+
+    return output;
+}
 
 /** @brief Loads the default program into the sequential network program memory.
   * Note: needs to be called only once at startup
@@ -15,7 +70,6 @@ void LoadProgram_Default(void)
 {
     SeqNet_Out instr = {0};
 
-    SeqNet_init();
     ProgramSize = 0U;
 
     /* PC = 0: Check for pending call → jump to 2 if any call exists */
@@ -206,12 +260,30 @@ void LoadProgram_Default(void)
     ProgramSize++;
 }
 
-
-void checkIfProgramCounterIsOutOfBounds(void)
+void printProgMem(void)
 {
-    if (getProgramCounter() > ProgramSize)
+    printf("Program Memory:\n");
+    for (uint8_t i = 0; i < ProgramSize; i++)
     {
-       ASSERT_FATAL_ERROR("ERROR: Program counter is out of bounds");
+        SeqNet_Out instr = DecodeInstruction(ProgMem[i]);
+        printf("PC: %2d | Jump: %2d | MoveUp: %d | MoveDown: %d | Door: %s | Reset: %d | CondSel: %d | CondInv: %d | InstrHex: 0x%04X\n",
+               i, instr.jump_addr, instr.req_move_up, instr.req_move_down,
+               instr.req_door_state ? "OPEN" : "CLOSED", instr.req_reset,
+               instr.cond_sel, instr.cond_inv, ProgMem[i]);
     }
 }
 
+uint8_t GetProgramSize(void)
+{
+    return ProgramSize;
+}
+
+uint8_t GetProgramCounter(void)
+{
+    return PC;
+}
+
+uint16_t GetProgMemAtPC(uint8_t program_counter)
+{
+    return ProgMem[program_counter];
+}

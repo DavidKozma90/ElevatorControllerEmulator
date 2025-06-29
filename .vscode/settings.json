@@ -9,7 +9,8 @@
 		"**/*.exe": true,
 	},
 	"files.associations": {
-		"condsel.h": "c",
-		"assert.h": "c"
-	}
+        "condsel.h": "c",
+        "assert.h": "c",
+        "compare": "c"
+    }
 }
