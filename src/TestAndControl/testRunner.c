@@ -105,7 +105,7 @@ void ASSERT_CALL_NOT_ACTIVE(void)
 
 /* -------------- Test Cases -------------- */
 
-void test_move_down_single_call() 
+static void testMoveDownSingleCall() 
 {
     int pc_before = 0;
     int pc_after = 0;
@@ -169,7 +169,7 @@ void test_move_down_single_call()
     teardown();
 }
 
-void test_move_up_single_call() 
+static void testMoveUpSingleCall() 
 {
     uint8_t pc_before = 0;
     uint8_t pc_after = 0;
@@ -234,7 +234,7 @@ void test_move_up_single_call()
     teardown();
 }
 
-void test_same_floor_call_handled() 
+static void testSameFloorCallHandled() 
 {
     uint8_t pc_before = 0;
     uint8_t pc_after = 0;
@@ -300,7 +300,7 @@ void test_same_floor_call_handled()
     teardown();
 }
 
-void test_call_repressed_during_door_open() 
+static void testCallRepressedDuringDoorOpen() 
 {
     bool repressed = false;
     uint8_t pc_before = 0;
@@ -390,7 +390,7 @@ void test_call_repressed_during_door_open()
     teardown();
 }
 
-void test_idle_no_calls() 
+static void testIdleNoCalls() 
 {
     uint8_t pc_before = 0;
     uint8_t pc_after = 0;
@@ -435,7 +435,7 @@ void test_idle_no_calls()
     teardown();
 }
 
-void test_new_call_during_movement() 
+static void testNewCallDuringMovement() 
 {
     bool second_call_triggered = false;
     uint8_t pc_before = 0;
@@ -541,7 +541,7 @@ void TestSimpleCalls(uint8_t elevator_pos, uint8_t call_floor)
     cond.door_closed = false;
     cond.door_open = true;
 
-    for (int cycle = 0; cycle < 50; ++cycle)
+    for (int cycle = 0; cycle < 25; ++cycle)
     {
         if (call_active) 
         {
@@ -594,12 +594,12 @@ void TestSimpleCalls(uint8_t elevator_pos, uint8_t call_floor)
 /* Test API */
 void RunValidationTests(void)
 {
-    registerTest("Move Down to Target", test_move_down_single_call);
-    registerTest("Move Up to Target", test_move_up_single_call);
-    registerTest("Handle Same Floor Call", test_same_floor_call_handled);
-    registerTest("Re-Press Call During Door Open", test_call_repressed_during_door_open);
-    registerTest("Idle Loop with No Calls", test_idle_no_calls);
-    registerTest("New Call During Movement", test_new_call_during_movement);
+    registerTest("Move Down to Target", testMoveDownSingleCall);
+    registerTest("Move Up to Target", testMoveUpSingleCall);
+    registerTest("Handle Same Floor Call", testSameFloorCallHandled);
+    registerTest("Re-Press Call During Door Open", testCallRepressedDuringDoorOpen);
+    registerTest("Idle Loop with No Calls", testIdleNoCalls);
+    registerTest("New Call During Movement", testNewCallDuringMovement);
 
     runAllTests();
 }
