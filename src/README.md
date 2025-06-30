@@ -306,4 +306,13 @@ This section outlines key safety concerns related to the elevator controller des
 | Direction prioritization| ✅       | Simple logic, no movement memory                   |
 | API safety gaps        | ⚠️        | Extension required for full safety coverage        |
 
+---
+---
 
+## AI usage disclaimer
+Since the assignment allowed the usage of AI, for transparency reasons here are the tasks it was used for (ChatGPT-4.1 and GitHub Copilot):
+* Helping with the concept of the tasks
+* Code review and code check for coding mistakes
+* Documentation structure and safety concern suggestions based on prompts
+
+Project framework, general coding design, manual testing and checking of AI decisions were done solely by the author
