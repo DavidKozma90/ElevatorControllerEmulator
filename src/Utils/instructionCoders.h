@@ -1,7 +1,5 @@
 #pragma once
 
-#include <stdint.h>
-#include <stdbool.h>
 #include "commonHeader.h"
 #include "PublicAPI/seqnet.h"
 
@@ -19,13 +17,16 @@ static inline uint16_t EncodeInstruction(const SeqNet_Out* instruction)
 {
     uint16_t encoded = 0;
 
-    encoded |= ((uint16_t)(instruction->jump_addr)       & JUMP_ADDR_MASK);
-    encoded |= ((uint16_t)(instruction->req_move_up & 0x01)    << REQ_MOVE_UP_SHIFT);
-    encoded |= ((uint16_t)(instruction->req_move_down & 0x01)  << REQ_MOVE_DOWN_SHIFT);
-    encoded |= ((uint16_t)(instruction->req_door_state & 0x01) << REQ_DOOR_STATE_SHIFT);
-    encoded |= ((uint16_t)(instruction->req_reset & 0x01)      << REQ_CALL_RESET_SHIFT);
-    encoded |= ((uint16_t)(instruction->cond_sel & 0x07)       << COND_SELECT_SHIFT);
-    encoded |= ((uint16_t)(instruction->cond_inv & 0x01)       << COND_INVERT_SHIFT);
+    if(instruction != NULL)
+    {   
+        encoded |= ((uint16_t)(instruction->jump_addr)              & JUMP_ADDR_MASK);
+        encoded |= ((uint16_t)(instruction->req_move_up & 0x01)    << REQ_MOVE_UP_SHIFT);
+        encoded |= ((uint16_t)(instruction->req_move_down & 0x01)  << REQ_MOVE_DOWN_SHIFT);
+        encoded |= ((uint16_t)(instruction->req_door_state & 0x01) << REQ_DOOR_STATE_SHIFT);
+        encoded |= ((uint16_t)(instruction->req_reset & 0x01)      << REQ_CALL_RESET_SHIFT);
+        encoded |= ((uint16_t)(instruction->cond_sel & 0x07)       << COND_SELECT_SHIFT);
+        encoded |= ((uint16_t)(instruction->cond_inv & 0x01)       << COND_INVERT_SHIFT);
+    }
 
     return encoded;
 }

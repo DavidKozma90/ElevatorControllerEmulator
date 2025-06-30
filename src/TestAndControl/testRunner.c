@@ -102,6 +102,11 @@ void ASSERT_PC_IS_WITHIN_BOUNDS(void)
     CUSTOM_ASSERT((GetProgramCounter() < GetProgramSize()), "Test Fail: Program counter is out of bounds!");
 }
 
+void ASSERT_CALL_NOT_ACTIVE(void)
+{
+    CUSTOM_ASSERT(!callActive, "Test Fail: Initial call not completed.");
+}
+
 /* -------------- Test Cases -------------- */
 
 void test_move_down_single_call() 
@@ -147,7 +152,6 @@ void test_move_down_single_call()
                cycle, pc_before, pc_after, output.req_move_up, output.req_move_down,
                output.req_door_state ? "OPEN" : "CLOSED", output.req_reset, elevatorPos);
 
-        // Simulate movement
         if (output.req_move_down && condition.call_pending_below && (elevatorPos >= 0))
         {
             elevatorPos--;
@@ -158,16 +162,8 @@ void test_move_down_single_call()
         }
 
         /* Simulate door state */
-        if (output.req_door_state)
-        {
-            condition.door_open = true;
-            condition.door_closed = false;
-        }
-        else
-        {
-            condition.door_open = false;
-            condition.door_closed = true;
-        }
+        condition.door_open = (output.req_door_state) ? true : false;
+        condition.door_closed = (output.req_door_state) ? false : true;
 
         ASSERT_PC_IS_WITHIN_BOUNDS();
     }
@@ -231,16 +227,8 @@ void test_move_up_single_call()
         }
 
         /* Simulate door state */
-        if (output.req_door_state)
-        {
-            condition.door_open = true;
-            condition.door_closed = false;
-        }
-        else
-        {
-            condition.door_open = false;
-            condition.door_closed = true;
-        }
+        condition.door_open = (output.req_door_state) ? true : false;
+        condition.door_closed = (output.req_door_state) ? false : true;
 
         ASSERT_PC_IS_WITHIN_BOUNDS();
     }
@@ -304,16 +292,8 @@ void test_same_floor_call_handled()
         }
 
         /* Simulate door state */
-        if (output.req_door_state)
-        {
-            condition.door_open = true;
-            condition.door_closed = false;
-        }
-        else
-        {
-            condition.door_open = false;
-            condition.door_closed = true;
-        }
+        condition.door_open = (output.req_door_state) ? true : false;
+        condition.door_closed = (output.req_door_state) ? false : true;
 
         ASSERT_NO_MOVEMENT();
         ASSERT_PC_IS_WITHIN_BOUNDS();
@@ -397,29 +377,16 @@ void test_call_repressed_during_door_open()
             condition.door_closed = true;
         }
 
-        ASSERT_NO_MOVEMENT();
-        ASSERT_PC_IS_WITHIN_BOUNDS();
-
-        condition.call_pending_same  = (elevatorPos == callFloor);
-
-
         /* Simulate door state */
-        if (output.req_door_state)
-        {
-            condition.door_open = true;
-            condition.door_closed = false;
-        }
-        else
-        {
-            condition.door_open = false;
-            condition.door_closed = true;
-        }
-
+        condition.door_open = (output.req_door_state) ? true : false;
+        condition.door_closed = (output.req_door_state) ? false : true;
+        
         ASSERT_NO_MOVEMENT();
         if ((cycle > 25) && repressed) 
         {
             ASSERT_DOOR_IS_OPEN();
         }
+        ASSERT_PC_IS_WITHIN_BOUNDS();
     }
 
     ASSERT_ELEVATOR_REACHES_FLOOR(2);
@@ -455,16 +422,8 @@ void test_idle_no_calls()
                output.req_door_state ? "OPEN" : "CLOSED", output.req_reset, elevatorPos);
 
         /* Simulate door state */
-        if (output.req_door_state)
-        {
-            condition.door_open = true;
-            condition.door_closed = false;
-        }
-        else
-        {
-            condition.door_open = false;
-            condition.door_closed = true;
-        }
+        condition.door_open = (output.req_door_state) ? true : false;
+        condition.door_closed = (output.req_door_state) ? false : true;
 
         ASSERT_NO_MOVEMENT();
 
@@ -487,7 +446,6 @@ void test_new_call_during_movement()
     uint8_t pc_after = 0;
     bool cond_result = false;
 
-    // Start from floor 1, original target is floor 4
     setup(1, 4);
 
     int second_call_floor = 2;
@@ -495,14 +453,12 @@ void test_new_call_during_movement()
 
     for (int cycle = 0; cycle < MAX_CYCLES; ++cycle) 
     {
-        // Trigger second call while elevator is moving (e.g., after 5 cycles)
         if (cycle == 5) 
         {
             second_call_active = true;
             second_call_triggered = true;
         }
 
-        // Update condition flags based on current floor and active calls
         condition.call_pending_same =
             (callActive && elevatorPos == callFloor) ||
             (second_call_active && elevatorPos == second_call_floor);
@@ -515,11 +471,18 @@ void test_new_call_during_movement()
             (callActive && elevatorPos < callFloor) ||
             (second_call_active && elevatorPos < second_call_floor);
 
-        // Clear calls on reset
         if (output.req_reset) 
         {
-            if (elevatorPos == callFloor) callActive = false;
-            if (elevatorPos == second_call_floor) second_call_active = false;
+            if (elevatorPos == callFloor)
+            {
+                callActive = false;
+            }
+
+            if (elevatorPos == second_call_floor)
+            { 
+                second_call_active = false;
+            }
+
             if (!callActive && !second_call_active)
             {
                 break;
@@ -539,28 +502,23 @@ void test_new_call_during_movement()
             output.req_door_state ? "OPEN" : "CLOSED", output.req_reset, elevatorPos);
 
         // Simulate movement
-        if (output.req_move_down && condition.call_pending_below && elevatorPos > 0)
+        if (output.req_move_down && condition.call_pending_below && elevatorPos >= 0)
+        {
             elevatorPos--;
-        else if (output.req_move_up && condition.call_pending_above && elevatorPos < 5)
+        }
+        else if (output.req_move_up && condition.call_pending_above && elevatorPos <= 5)
+        {
             elevatorPos++;
+        }
 
         /* Simulate door state */
-        if (output.req_door_state)
-        {
-            condition.door_open = true;
-            condition.door_closed = false;
-        }
-        else
-        {
-            condition.door_open = false;
-            condition.door_closed = true;
-        }
+        condition.door_open = (output.req_door_state) ? true : false;
+        condition.door_closed = (output.req_door_state) ? false : true;
 
         ASSERT_PC_IS_WITHIN_BOUNDS();
     }
 
-    // Final assertions
-    CUSTOM_ASSERT(!callActive, "Test Fail: Initial call not completed.");
+    ASSERT_CALL_NOT_ACTIVE();
     CUSTOM_ASSERT(!second_call_active, "Test Fail: New call not completed.");
     ASSERT_DOOR_IS_OPEN();
     CUSTOM_ASSERT((elevatorPos == callFloor || elevatorPos == second_call_floor),
@@ -570,7 +528,74 @@ void test_new_call_during_movement()
     teardown();
 }
 
+/** @brief Example test case for short simple trial
+ * Not part of the test suite, but it is used in main.c
+ * to demonstrate how to use the test framework.
+ * Please do not use this in this file.
+ */
+void TestSimpleCalls(uint8_t elevator_pos, uint8_t call_floor)
+{
+    CondSel_In cond = {0};
+    SeqNet_Out out = {0};
+    bool cond_result;
+    int pc_before = 0;
+    int pc_after = 0;
+    bool call_active = true;
 
+    cond.door_closed = false;
+    cond.door_open = true;
+
+    for (int cycle = 0; cycle < 50; ++cycle)
+    {
+        if (call_active) 
+        {
+            cond.call_pending_same  = (elevator_pos == call_floor);
+            cond.call_pending_below = (elevator_pos > call_floor);
+            cond.call_pending_above = (elevator_pos < call_floor);
+        }
+        else 
+        {
+            cond.call_pending_same = false;
+            cond.call_pending_below = false;
+            cond.call_pending_above = false;
+        }
+
+        if (out.req_reset) 
+        {
+            cond.call_pending_same = false;
+            cond.call_pending_above = false;
+            cond.call_pending_below = false;
+            call_active = false;
+        }
+
+        pc_before = GetProgramCounter();
+        uint16_t raw_instr = GetProgMemAtPC(pc_before);
+        SeqNet_Out instr = DecodeInstruction(raw_instr);
+
+        cond_result = CondSel_calc(instr.cond_inv, instr.cond_sel, cond);
+        out = SeqNet_loop(cond_result);
+        pc_after = GetProgramCounter();
+
+        printf("Cycle %2d | PC: %2d → %2d | MoveUp: %d | MoveDown: %d | Door: %s | Reset: %d | Floor: %d\n",
+               cycle, pc_before, pc_after, out.req_move_up, out.req_move_down,
+               out.req_door_state ? "OPEN" : "CLOSED", out.req_reset, elevator_pos);
+
+        if (out.req_move_down && cond.call_pending_below && (elevator_pos >= 0))
+        {
+            elevator_pos--;
+        }
+        else if (out.req_move_up && cond.call_pending_above && (elevator_pos <= 5))
+        {
+            elevator_pos++;
+        }
+
+        /* Simulate door state */
+        cond.door_open = (out.req_door_state) ? true : false;
+        cond.door_closed = (out.req_door_state) ? false : true;
+    }
+}
+
+/* Test API */
 void RunValidationTests(void)
 {
     registerTest("Move Down to Target", test_move_down_single_call);
@@ -582,16 +607,3 @@ void RunValidationTests(void)
 
     runAllTests();
 }
-
-// -------------- Main Entry Point --------------
-#if 0
-int main() {
-    register_test("Move Down to Target", test_move_down_single_call);
-    register_test("Move Up to Target", test_move_up_single_call);
-    register_test("Handle Same Floor Call", test_same_floor_call_handled);
-    register_test("Re-Press Call During Door Open", test_call_repressed_during_door_open);
-
-    run_all_tests();
-    return 0;
-}
-#endif

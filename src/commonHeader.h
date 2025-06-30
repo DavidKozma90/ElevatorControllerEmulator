@@ -1,7 +1,9 @@
 #pragma once
 
+/* STD Library headers are define here */
 #include <stdint.h>
 #include <stdbool.h>
+#include <stdio.h>
 
 #define PROG_MEM_SIZE 256U
 
@@ -28,13 +30,13 @@ typedef enum
     CONDSEL_FIXED_ZERO         = 7   /* Fixed value of zero (false) */
 }CondSelIndex_e;
 
-extern const uint16_t JUMP_ADDR_MASK;
-extern const uint16_t REQ_MOVE_UP_MASK;
-extern const uint16_t REQ_MOVE_DOWN_MASK;
-extern const uint16_t REQ_DOOR_STATE_MASK;
-extern const uint16_t REQ_CALL_RESET_MASK;
-extern const uint16_t COND_SELECT_MASK;
-extern const uint16_t COND_INVERT_MASK;
+static const uint16_t JUMP_ADDR_MASK      = 0x00FFU;
+static const uint16_t REQ_MOVE_UP_MASK    = 0x0100U;
+static const uint16_t REQ_MOVE_DOWN_MASK  = 0x0200U;
+static const uint16_t REQ_DOOR_STATE_MASK = 0x0400U;
+static const uint16_t REQ_CALL_RESET_MASK = 0x0800U;
+static const uint16_t COND_SELECT_MASK    = 0x7000U;
+static const uint16_t COND_INVERT_MASK    = 0x8000U;
 
 static const uint16_t REQ_MOVE_UP_SHIFT    = 8U;
 static const uint16_t REQ_MOVE_DOWN_SHIFT  = 9U;
@@ -49,3 +51,4 @@ extern uint8_t GetProgramSize(void);
 extern void RunValidationTests(void);
 extern uint16_t GetProgMemAtPC(uint8_t program_counter);
 extern void printProgMem(void);
+extern void TestSimpleCalls(uint8_t elevator_pos, uint8_t call_floor);

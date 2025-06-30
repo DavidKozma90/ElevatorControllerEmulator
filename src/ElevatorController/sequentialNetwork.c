@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include "commonHeader.h"
 #include "PublicAPI/seqnet.h"
-#include "Utils/instructionEncoder.h"
+#include "Utils/instructionCoders.h"
 
 #define PROG_MEM_SIZE 256U
 
@@ -13,17 +13,12 @@ static uint16_t ProgMem[PROG_MEM_SIZE];
 /** @brief Program counter for the sequential network.
   * Note: needs to be initialized before use.
   */
-static volatile uint8_t PC;
+static volatile uint8_t PC = 0U;
 
+/** @brief Size of the program in the sequential network.
+  * Note: needs to be initialized before use.
+  */
 static uint8_t ProgramSize = 0U;
-
-const uint16_t JUMP_ADDR_MASK      = 0x00FFU;
-const uint16_t REQ_MOVE_UP_MASK    = 0x0100U;
-const uint16_t REQ_MOVE_DOWN_MASK  = 0x0200U;
-const uint16_t REQ_DOOR_STATE_MASK = 0x0400U;
-const uint16_t REQ_CALL_RESET_MASK = 0x0800U;
-const uint16_t COND_SELECT_MASK    = 0x7000U;
-const uint16_t COND_INVERT_MASK    = 0x8000U;
 
 /** @brief Initializes the sequential network internal state.
   * Note: needs to be called only once at startup

@@ -12,7 +12,7 @@
 
 /* Always false assert and crash for critical errors in debug mode */
 /* Set while (1) to capture assert infinitely -> can be used for LED blinking in debug mode for example */
-#define ASSERT_FATAL_ERROR(message)          \
+#define ASSERT_ERROR(message)          \
     do                                       \
     {                                        \
         assert(false && (message));          \

@@ -1,97 +1,74 @@
 #include "commonHeader.h"
 #include "PublicAPI/seqnet.h"
 #include "PublicAPI/condsel.h"
-#include "Utils/instructionEncoder.h"
+#include "Utils/instructionCoders.h"
 #include "Utils/customAssert.h"
 
-#include <stdio.h>
-#include <stdbool.h>
-
-void testSimpleCalls(uint8_t elevator_pos, uint8_t call_floor)
+static void printMenu(void) 
 {
-    CondSel_In cond = {0};
-    SeqNet_Out out = {0};
-    bool cond_result;
-    int pc_before = 0;
-    int pc_after = 0;
-    bool call_active = true;
-
-    cond.door_closed = true;
-    cond.door_open = false;
-
-    for (int cycle = 0; cycle < 50; ++cycle)
-    {
-        if (call_active) 
-        {
-            cond.call_pending_same  = (elevator_pos == call_floor);
-            cond.call_pending_below = (elevator_pos > call_floor);
-            cond.call_pending_above = (elevator_pos < call_floor);
-        }
-        else 
-        {
-            cond.call_pending_same = false;
-            cond.call_pending_below = false;
-            cond.call_pending_above = false;
-        }
-
-        if (out.req_reset) 
-        {
-            cond.call_pending_same = false;
-            cond.call_pending_above = false;
-            cond.call_pending_below = false;
-            call_active = false;
-        }
-
-        pc_before = GetProgramCounter();
-        uint16_t raw_instr = GetProgMemAtPC(pc_before);
-        SeqNet_Out instr = DecodeInstruction(raw_instr);
-
-        cond_result = CondSel_calc(instr.cond_inv, instr.cond_sel, cond);
-        out = SeqNet_loop(cond_result);
-        pc_after = GetProgramCounter();
-
-        printf("Cycle %2d | PC: %2d → %2d | MoveUp: %d | MoveDown: %d | Door: %s | Reset: %d | Floor: %d\n",
-               cycle, pc_before, pc_after, out.req_move_up, out.req_move_down,
-               out.req_door_state ? "OPEN" : "CLOSED", out.req_reset, elevator_pos);
-
-        // Simulate movement
-        if (out.req_move_down && cond.call_pending_below && (elevator_pos >= 0))
-        {
-               elevator_pos--;
-        }
-           else if (out.req_move_up && cond.call_pending_above && (elevator_pos <= 5))
-           {
-            elevator_pos++;
-        }
-
-        /* Simulate door state */
-        if (out.req_door_state)
-        {
-            cond.door_open = true;
-            cond.door_closed = false;
-        }
-        else
-        {
-            cond.door_open = false;
-            cond.door_closed = true;
-        }
-    }
+    printf("\nElevator Controller Emulator - Menu\n");
+    printf("1. Run simple example simulation \n");
+    printf("2. Load and display default program\n");
+    printf("3. Print program memory \n");
+    printf("4. Run validation tests\n");
+    printf("x. Exit\n");
+    printf("Select an option (and press Enter): ");
 }
 
-int main ()
+int main()
 {
-#if 0
-    // Load the elevator control program
+    char input[16];
+
+    SeqNet_init();
     LoadProgram_Default();
 
-    testSimpleCalls(5, 1);
-    testSimpleCalls(1, 5);
-    testSimpleCalls(2, 2);
-#endif
+    while (1) 
+    {
+        printMenu();
+        if (!fgets(input, sizeof(input), stdin)) 
+        {
+            continue;
+        }
 
-    LoadProgram_Default();
-    RunValidationTests();
+        switch (input[0]) 
+        {
+            case '1':   
+                int elevator_pos = 0, call_floor = 0;
+                printf("Enter elevator starting position (0-5): ");
+                if (scanf("%d", &elevator_pos) != 1 || elevator_pos < 0 || elevator_pos > 5) 
+                {
+                    printf("Invalid input. Please enter a number between 0 and 5.\n");
+                    int c; while ((c = getchar()) != '\n' && c != EOF);
+                    break;
+                }
 
-    return 0;
-
+                printf("Enter destination floor (0-5): ");
+                if (scanf("%d", &call_floor) != 1 || call_floor < 0 || call_floor > 5) 
+                {
+                    printf("Invalid input. Please enter a number between 0 and 5.\n");
+                    int c; while ((c = getchar()) != '\n' && c != EOF);
+                    break;
+                }
+                int c; while ((c = getchar()) != '\n' && c != EOF);
+                TestSimpleCalls((uint8_t)elevator_pos, (uint8_t)call_floor);
+                break;
+            case '2':
+                LoadProgram_Default();
+                printf("Default program loaded.\n");
+                printProgMem();
+                break;
+            case '3':
+                printProgMem();
+                break;
+            case '4':
+                RunValidationTests();
+                break;
+            case 'x':
+            case 'X':
+                printf("Exiting...\n");
+                return 0;
+            default:
+                printf("Unknown option. Please try again.\n");
+        }
+    }
 }
