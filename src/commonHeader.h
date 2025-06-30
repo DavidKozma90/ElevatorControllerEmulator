@@ -50,5 +50,5 @@ extern void LoadProgram_Default(void);
 extern uint8_t GetProgramSize(void);
 extern void RunValidationTests(void);
 extern uint16_t GetProgMemAtPC(uint8_t program_counter);
-extern void printProgMem(void);
+extern void PrintProgMem(void);
 extern void TestSimpleCalls(uint8_t elevator_pos, uint8_t call_floor);

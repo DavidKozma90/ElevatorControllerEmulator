@@ -1,11 +1,7 @@
-#include <stdio.h>
-#include <stdbool.h>
-#include <assert.h>
-
 #include "commonHeader.h"
 #include "PublicAPI/seqnet.h"
 #include "PublicAPI/condsel.h"
-#include "Utils/instructionEncoder.h"
+#include "Utils/instructionCoders.h"
 #include "Utils/customAssert.h"
 
 #define MAX_CYCLES 50

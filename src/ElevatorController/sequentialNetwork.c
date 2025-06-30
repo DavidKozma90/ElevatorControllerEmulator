@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include "commonHeader.h"
 #include "PublicAPI/seqnet.h"
 #include "Utils/instructionCoders.h"
@@ -255,7 +254,7 @@ void LoadProgram_Default(void)
     ProgramSize++;
 }
 
-void printProgMem(void)
+void PrintProgMem(void)
 {
     printf("Program Memory:\n");
     for (uint8_t i = 0; i < ProgramSize; i++)

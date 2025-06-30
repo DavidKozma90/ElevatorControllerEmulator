@@ -1,8 +1,6 @@
 #include "commonHeader.h"
 #include "PublicAPI/seqnet.h"
 #include "PublicAPI/condsel.h"
-#include "Utils/instructionCoders.h"
-#include "Utils/customAssert.h"
 
 static void printMenu(void) 
 {
@@ -55,10 +53,10 @@ int main()
             case '2':
                 LoadProgram_Default();
                 printf("Default program loaded.\n");
-                printProgMem();
+                PrintProgMem();
                 break;
             case '3':
-                printProgMem();
+                PrintProgMem();
                 break;
             case '4':
                 RunValidationTests();
